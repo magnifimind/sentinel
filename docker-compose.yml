@@ -1,0 +1,50 @@
+# Local development only — Kafka + PostgreSQL for running the Go API on Mac
+services:
+  postgresql:
+    image: bitnami/postgresql:17
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRESQL_USERNAME: sentinel
+      POSTGRESQL_PASSWORD: sentinel
+      POSTGRESQL_DATABASE: sentinel
+    volumes:
+      - pg_data:/bitnami/postgresql
+      - ./migrations:/docker-entrypoint-initdb.d
+
+  kafka:
+    image: bitnami/kafka:4.0
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_CFG_NODE_ID: 0
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_KRAFT_CLUSTER_ID: sentinel-dev-cluster-0001
+    volumes:
+      - kafka_data:/bitnami/kafka
+
+  kafka-init:
+    image: bitnami/kafka:4.0
+    depends_on:
+      - kafka
+    restart: "no"
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        echo "Waiting for Kafka..."
+        until kafka-topics.sh --bootstrap-server kafka:9092 --list 2>/dev/null; do sleep 2; done
+        for TOPIC in agent.decisions agent.actions agent.outcomes; do
+          kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic $$TOPIC --partitions 3 --replication-factor 1
+        done
+        echo "Topics ready."
+        kafka-topics.sh --bootstrap-server kafka:9092 --list
+
+volumes:
+  pg_data:
+  kafka_data:

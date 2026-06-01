@@ -78,6 +78,18 @@ modelServer:
     port: 11434
   model: "llama3.1:8b-instruct-q4_0"
 
+# Kafka topics (created by post-install Job)
+kafkaTopics:
+  - name: agent.decisions
+    partitions: 3
+    replicationFactor: 1
+  - name: agent.actions
+    partitions: 3
+    replicationFactor: 1
+  - name: agent.outcomes
+    partitions: 3
+    replicationFactor: 1
+
 # PostgreSQL (Bitnami subchart)
 postgresql:
   enabled: true

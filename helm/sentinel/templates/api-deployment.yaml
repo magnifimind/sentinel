@@ -14,6 +14,15 @@ spec:
       labels:
         {{- include "sentinel.api.labels" . | nindent 8 }}
     spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.37
+          imagePullPolicy: IfNotPresent
+          command: ['sh', '-c', 'until nc -z {{ .Release.Name }}-postgresql 5432; do echo "waiting for postgres..."; sleep 3; done']
+        - name: wait-for-kafka
+          image: busybox:1.37
+          imagePullPolicy: IfNotPresent
+          command: ['sh', '-c', 'until nc -z {{ .Release.Name }}-kafka 9092; do echo "waiting for kafka..."; sleep 3; done']
       containers:
         - name: api
           image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"

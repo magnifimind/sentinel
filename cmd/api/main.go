@@ -78,8 +78,10 @@ func main() {
 	auditH := handler.NewAuditHandler(db, logger)
 
 	// Routes
+	readyz := handler.NewReadyzHandler(db)
+
 	r.Get("/healthz", handler.Healthz)
-	r.Get("/readyz", handler.Readyz)
+	r.Method("GET", "/readyz", readyz)
 	r.Handle("/metrics", promhttp.Handler())
 
 	r.Route("/api/v1", func(r chi.Router) {

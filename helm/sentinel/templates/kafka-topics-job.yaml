@@ -1,0 +1,51 @@
+{{- if .Values.kafka.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "sentinel.fullname" . }}-kafka-topics
+  labels:
+    {{- include "sentinel.labels" . | nindent 4 }}
+    app.kubernetes.io/component: kafka-init
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      labels:
+        {{- include "sentinel.labels" . | nindent 8 }}
+        app.kubernetes.io/component: kafka-init
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: create-topics
+          image: bitnami/kafka:{{ .Values.kafka.image.tag | default "4.0" }}
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+              BROKER="{{ .Release.Name }}-kafka:9092"
+              echo "Waiting for Kafka at $BROKER..."
+              until kafka-metadata.sh --snapshot /dev/null --command-config /dev/null 2>/dev/null || \
+                    kafka-topics.sh --bootstrap-server "$BROKER" --list >/dev/null 2>&1; do
+                echo "  Kafka not ready, retrying in 5s..."
+                sleep 5
+              done
+              echo "Kafka is ready."
+
+              {{- range .Values.kafkaTopics }}
+              echo "Creating topic {{ .name }}..."
+              kafka-topics.sh --bootstrap-server "$BROKER" \
+                --create --if-not-exists \
+                --topic {{ .name }} \
+                --partitions {{ .partitions | default 3 }} \
+                --replication-factor {{ .replicationFactor | default 1 }}
+              {{- end }}
+
+              echo "All topics created."
+              kafka-topics.sh --bootstrap-server "$BROKER" --list
+{{- end }}
