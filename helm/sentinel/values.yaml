@@ -1,0 +1,102 @@
+# -- Sentinel Helm Values --
+
+# API Server (Go)
+api:
+  replicaCount: 1
+  image:
+    repository: 192.168.1.200:5000/sentinel-api
+    tag: "0.1.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  env:
+    LISTEN_ADDR: ":8080"
+    DB_HOST: "sentinel-postgresql"
+    DB_PORT: "5432"
+    DB_USER: "sentinel"
+    DB_NAME: "sentinel"
+    DB_SSLMODE: "disable"
+    KAFKA_BROKERS: "sentinel-kafka:9092"
+    KAFKA_CONSUMER_GROUP: "sentinel-api"
+
+# Agent Worker (Python) — Phase 2 service #2
+agentWorker:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: 192.168.1.200:5000/sentinel-agent-worker
+    tag: "0.1.0"
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Dashboard (React/TypeScript) — Phase 2 service #4
+dashboard:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: 192.168.1.200:5000/sentinel-dashboard
+    tag: "0.1.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+
+# Model Server (Ollama) — GPU workload
+modelServer:
+  enabled: false
+  image:
+    repository: ollama/ollama
+    tag: "0.9.6"
+    pullPolicy: IfNotPresent
+  runtimeClassName: nvidia
+  resources:
+    limits:
+      nvidia.com/gpu: 1
+      memory: 10Gi
+    requests:
+      memory: 8Gi
+  persistence:
+    size: 20Gi
+    storageClass: local-path
+  service:
+    type: ClusterIP
+    port: 11434
+  model: "llama3.1:8b-instruct-q4_0"
+
+# PostgreSQL (Bitnami subchart)
+postgresql:
+  enabled: true
+  auth:
+    username: sentinel
+    password: sentinel
+    database: sentinel
+  primary:
+    persistence:
+      size: 10Gi
+      storageClass: local-path
+
+# Kafka (Bitnami subchart)
+kafka:
+  enabled: true
+  listeners:
+    client:
+      protocol: PLAINTEXT
+  controller:
+    replicaCount: 1
+    persistence:
+      size: 10Gi
+      storageClass: local-path

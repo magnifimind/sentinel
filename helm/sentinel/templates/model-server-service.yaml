@@ -1,0 +1,17 @@
+{{- if .Values.modelServer.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "sentinel.fullname" . }}-model-server
+  labels:
+    {{- include "sentinel.modelServer.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.modelServer.service.type }}
+  ports:
+    - port: {{ .Values.modelServer.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "sentinel.modelServer.selectorLabels" . | nindent 4 }}
+{{- end }}

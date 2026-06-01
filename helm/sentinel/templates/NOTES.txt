@@ -1,0 +1,16 @@
+Sentinel has been deployed.
+
+Components:
+  API Server:     {{ include "sentinel.fullname" . }}-api
+  PostgreSQL:     {{ .Release.Name }}-postgresql
+  Kafka:          {{ .Release.Name }}-kafka
+{{- if .Values.modelServer.enabled }}
+  Model Server:   {{ include "sentinel.fullname" . }}-model-server (GPU)
+{{- end }}
+
+API endpoint (cluster-internal):
+  http://{{ include "sentinel.fullname" . }}-api:{{ .Values.api.service.port }}
+
+Verify:
+  kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/part-of=sentinel
+  curl http://{{ include "sentinel.fullname" . }}-api:{{ .Values.api.service.port }}/healthz

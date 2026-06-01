@@ -1,0 +1,62 @@
+# Go binaries
+/sentinel-api
+*.exe
+*.test
+*.out
+
+# Go build/cache
+/vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+._*
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Build artifacts
+/dist/
+/tmp/
+/bin/
+
+# Docker
+docker-compose.override.yml
+
+# Helm
+helm/sentinel/charts/*.tgz
+
+# Draw.io temp files
+*.dtmp
+*.bkp
+~$*.drawio
+
+# Python (agent-worker, future)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Node (dashboard, future)
+node_modules/
+/dashboard/dist/
+.npm/
+*.tsbuildinfo
+
+# Coverage / test output
+coverage/
+*.coverprofile
+coverage.out
