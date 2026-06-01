@@ -35,6 +35,7 @@ agentWorker:
     repository: 192.168.1.200:5000/sentinel-agent-worker
     tag: "0.1.0"
     pullPolicy: IfNotPresent
+  checkIntervalSeconds: 300
   resources:
     requests:
       cpu: 100m

@@ -1,0 +1,45 @@
+{{- if .Values.agentWorker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sentinel.fullname" . }}-agent-worker
+  labels:
+    {{- include "sentinel.labels" . | nindent 4 }}
+    app.kubernetes.io/name: sentinel-agent-worker
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: agent-worker
+spec:
+  replicas: {{ .Values.agentWorker.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sentinel-agent-worker
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: agent-worker
+  template:
+    metadata:
+      labels:
+        {{- include "sentinel.labels" . | nindent 8 }}
+        app.kubernetes.io/name: sentinel-agent-worker
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: agent-worker
+    spec:
+      containers:
+        - name: agent-worker
+          image: "{{ .Values.agentWorker.image.repository }}:{{ .Values.agentWorker.image.tag }}"
+          imagePullPolicy: {{ .Values.agentWorker.image.pullPolicy }}
+          env:
+            - name: SENTINEL_API_BASE_URL
+              value: "http://{{ include "sentinel.fullname" . }}-api:{{ .Values.api.service.port }}"
+            - name: SENTINEL_AGENT_ID
+              value: "infra-monitor"
+            - name: SENTINEL_OLLAMA_BASE_URL
+              value: "http://{{ include "sentinel.fullname" . }}-model-server:{{ .Values.modelServer.service.port }}"
+            - name: SENTINEL_MODEL_NAME
+              value: {{ .Values.modelServer.model | quote }}
+            - name: SENTINEL_KAFKA_BROKERS
+              value: "{{ .Release.Name }}-kafka:9092"
+            - name: SENTINEL_CHECK_INTERVAL_SECONDS
+              value: {{ .Values.agentWorker.checkIntervalSeconds | default 300 | quote }}
+          resources:
+            {{- toYaml .Values.agentWorker.resources | nindent 12 }}
+{{- end }}
