@@ -21,7 +21,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: create-topics
-          image: bitnami/kafka:{{ .Values.kafka.image.tag | default "4.0" }}
+          image: "{{ .Values.kafka.image.repository }}:{{ .Values.kafka.image.tag }}"
           imagePullPolicy: IfNotPresent
           command:
             - /bin/bash
@@ -30,8 +30,7 @@ spec:
               set -e
               BROKER="{{ .Release.Name }}-kafka:9092"
               echo "Waiting for Kafka at $BROKER..."
-              until kafka-metadata.sh --snapshot /dev/null --command-config /dev/null 2>/dev/null || \
-                    kafka-topics.sh --bootstrap-server "$BROKER" --list >/dev/null 2>&1; do
+              until /opt/kafka/bin/kafka-topics.sh --bootstrap-server "$BROKER" --list >/dev/null 2>&1; do
                 echo "  Kafka not ready, retrying in 5s..."
                 sleep 5
               done
@@ -39,7 +38,7 @@ spec:
 
               {{- range .Values.kafkaTopics }}
               echo "Creating topic {{ .name }}..."
-              kafka-topics.sh --bootstrap-server "$BROKER" \
+              /opt/kafka/bin/kafka-topics.sh --bootstrap-server "$BROKER" \
                 --create --if-not-exists \
                 --topic {{ .name }} \
                 --partitions {{ .partitions | default 3 }} \
@@ -47,5 +46,5 @@ spec:
               {{- end }}
 
               echo "All topics created."
-              kafka-topics.sh --bootstrap-server "$BROKER" --list
+              /opt/kafka/bin/kafka-topics.sh --bootstrap-server "$BROKER" --list
 {{- end }}

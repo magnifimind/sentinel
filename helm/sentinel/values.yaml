@@ -93,6 +93,13 @@ kafkaTopics:
 # PostgreSQL (Bitnami subchart)
 postgresql:
   enabled: true
+  global:
+    security:
+      allowInsecureImages: true
+  image:
+    registry: 192.168.1.200:5000
+    repository: bitnami-postgresql
+    tag: "18.4.0"
   auth:
     username: sentinel
     password: sentinel
@@ -102,14 +109,12 @@ postgresql:
       size: 10Gi
       storageClass: local-path
 
-# Kafka (Bitnami subchart)
+# Kafka (our template, official Apache Kafka image from r740 registry)
 kafka:
   enabled: true
-  listeners:
-    client:
-      protocol: PLAINTEXT
-  controller:
-    replicaCount: 1
-    persistence:
-      size: 10Gi
-      storageClass: local-path
+  image:
+    repository: 192.168.1.200:5000/apache-kafka
+    tag: "4.0.0"
+  persistence:
+    size: 10Gi
+    storageClass: local-path
