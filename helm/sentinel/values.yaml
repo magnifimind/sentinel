@@ -5,7 +5,7 @@ api:
   replicaCount: 1
   image:
     repository: 192.168.1.200:5000/sentinel-api
-    tag: "0.1.0"
+    tag: "0.1.1"
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
@@ -46,15 +46,16 @@ agentWorker:
 
 # Dashboard (React/TypeScript) — Phase 2 service #4
 dashboard:
-  enabled: false
+  enabled: true
   replicaCount: 1
   image:
     repository: 192.168.1.200:5000/sentinel-dashboard
     tag: "0.1.0"
     pullPolicy: IfNotPresent
   service:
-    type: ClusterIP
+    type: NodePort
     port: 80
+    nodePort: 30187
 
 # Model Server (Ollama) — GPU workload
 modelServer:

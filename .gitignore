@@ -42,6 +42,7 @@ helm/sentinel/charts/*.tgz
 *.dtmp
 *.bkp
 ~$*.drawio
+.$*.bkp
 
 # Python (agent-worker, future)
 __pycache__/
