@@ -26,9 +26,9 @@ CREATE TABLE IF NOT EXISTS agent_decisions (
     model         TEXT
 );
 
-CREATE INDEX idx_decisions_agent_id ON agent_decisions(agent_id);
-CREATE INDEX idx_decisions_timestamp ON agent_decisions(timestamp DESC);
-CREATE INDEX idx_decisions_policy_result ON agent_decisions(policy_result);
+CREATE INDEX IF NOT EXISTS idx_decisions_agent_id ON agent_decisions(agent_id);
+CREATE INDEX IF NOT EXISTS idx_decisions_timestamp ON agent_decisions(timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_decisions_policy_result ON agent_decisions(policy_result);
 
 CREATE TABLE IF NOT EXISTS governance_violations (
     id          BIGSERIAL PRIMARY KEY,
@@ -40,8 +40,8 @@ CREATE TABLE IF NOT EXISTS governance_violations (
     resolution  TEXT
 );
 
-CREATE INDEX idx_violations_agent_id ON governance_violations(agent_id);
-CREATE INDEX idx_violations_severity ON governance_violations(severity);
+CREATE INDEX IF NOT EXISTS idx_violations_agent_id ON governance_violations(agent_id);
+CREATE INDEX IF NOT EXISTS idx_violations_severity ON governance_violations(severity);
 
 -- Audit trail view (from Confluence)
 CREATE OR REPLACE VIEW audit_trail AS
