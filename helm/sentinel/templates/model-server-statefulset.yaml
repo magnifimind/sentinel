@@ -31,6 +31,15 @@ spec:
           volumeMounts:
             - name: models
               mountPath: /root/.ollama
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - |
+                    until ollama list > /dev/null 2>&1; do sleep 2; done
+                    ollama pull {{ .Values.modelServer.model }}
           livenessProbe:
             httpGet:
               path: /api/tags

@@ -59,7 +59,7 @@ dashboard:
 
 # Model Server (Ollama) — GPU workload
 modelServer:
-  enabled: false
+  enabled: true
   image:
     repository: ollama/ollama
     tag: "0.9.6"
